@@ -194,7 +194,7 @@ def narr(req: NarrReq): return narrative(req.model_dump())
 
 @app.get("/alerts")
 def alerts(n: int = 25):
-    ts = TEST_SCORES.reset_index(); q = ts[ts.flag == 1].sort_values("p", ascending=False).head(n)
+    ts = TEST_SCORES.reset_index(); q = ts[ts.flag == 1].assign(risk=lambda d: d.p * d.money_total.clip(lower=100)).sort_values("risk", ascending=False).head(n)
     rows = []
     for r in q.itertuples():
         s = SE.loc[r.session_id]

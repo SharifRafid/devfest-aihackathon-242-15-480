@@ -1,14 +1,30 @@
+// Live mode talks to the FastAPI scorer. If it is unreachable (static hosting), fall back to the
+// snapshot exported by scripts/export_static.py — identical payloads, no backend required.
 const BASE = import.meta.env.VITE_API || '/api'
-async function j(url, opts) { const r = await fetch(BASE + url, opts); if (!r.ok) throw new Error(await r.text()); return r.json() }
+let mode = import.meta.env.VITE_STATIC === '1' ? 'static' : 'unknown'
+const cache = {}
+async function st(name) { if (!cache[name]) cache[name] = fetch(`/static/${name}.json`).then(r => { if (!r.ok) throw new Error('static missing'); return r.json() }); return cache[name] }
+async function live(url, opts) {
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 2500)
+  try { const r = await fetch(BASE + url, { ...opts, signal: ctl.signal }); if (!r.ok) throw new Error(await r.text()); mode = 'live'; return r.json() }
+  finally { clearTimeout(t) }
+}
+async function j(url, opts, fallback) {
+  if (mode !== 'static') { try { return await live(url, opts) } catch (e) { if (mode === 'live') throw e; mode = 'static' } }
+  return fallback()
+}
+export const getMode = () => mode
+const rnd = a => a[Math.floor(Math.random() * a.length)]
 export const api = {
-  health: () => j('/health'),
-  metrics: () => j('/metrics'),
-  demo: () => j('/demo/sessions'),
-  replay: sid => j(`/sessions/${sid}/replay`),
-  attack: kind => j(`/simulate/attack?kind=${kind}`, { method: 'POST' }),
-  alerts: () => j('/alerts'),
-  accounts: () => j('/accounts/flagged'),
-  narrative: body => j('/narrative', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }),
+  health: () => j('/health', undefined, () => st('health')),
+  metrics: () => j('/metrics', undefined, () => st('metrics')),
+  demo: () => j('/demo/sessions', undefined, () => st('demo_sessions')),
+  replay: sid => j(`/sessions/${sid}/replay`, undefined, async () => { const r = (await st('replays'))[sid]; if (!r) throw new Error('not in snapshot'); return r }),
+  attack: kind => j(`/simulate/attack?kind=${kind}`, { method: 'POST' }, async () => rnd((await st('attacks'))[kind])),
+  alerts: () => j('/alerts', undefined, () => st('alerts')),
+  accounts: () => j('/accounts/flagged', undefined, () => st('accounts_flagged')),
+  narrative: body => j('/narrative', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) },
+    async () => (await st('narratives'))[body.session_id] || { source: 'template', text: 'No snapshot narrative for a live-simulated session. Start the API for LLM narratives.' }),
 }
 export const EVENT_LABEL = {
   s_splash: 'Splash screen', s_login: 'Login screen', s_otp: 'OTP screen', s_home: 'Home screen', s_balance: 'Balance screen', s_send: 'Send Money screen',

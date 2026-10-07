@@ -90,6 +90,7 @@ def decide(p: float, feats: dict, top_reasons: list[str], thr: dict) -> dict:
 
     reasons = []
     for r in top_reasons:
+        if hl >= .7 and r in AUTOMATION_FEATS: continue   # a genuine human must never be told "the app's screens were not shown"
         if r in REASON_TEXT and REASON_TEXT[r] not in reasons: reasons.append(REASON_TEXT[r])
         if len(reasons) == 3: break
     en = [r[0] for r in reasons]; bn = [r[1] for r in reasons]

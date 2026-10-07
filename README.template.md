@@ -20,17 +20,17 @@ Bangladeshi MFS apps already ship code obfuscation, OTP auto-fill, VPN detection
 
 ## Results (held-out users, never seen in training)
 
-Train 51,657 sessions / test 12,625 sessions, split **by user** so per-user baselines cannot leak. Fraud rate in test 3.2%. Model: LightGBM + Markov flow model + Isolation Forest. Trains end-to-end in 40.9 s.
+Train {{NTRAIN}} sessions / test {{NTEST}} sessions, split **by user** so per-user baselines cannot leak. Fraud rate in test {{FRAUD_RATE}}. Model: {{MODEL}} + Markov flow model + Isolation Forest. Trains end-to-end in {{TRAIN_S}} s.
 
 | Metric | Second Thought | Rule baseline* | Unsupervised only** |
 |---|---|---|---|
-| AUC / PR-AUC | **0.9998 / 0.9936** | — | Markov 0.8666, IsoForest 0.9871 |
-| Recall at 2% false friction | **100.0%** | 82.7% at **12.1%** friction | 80.7% at 2.0% |
-| Recall on coerced victims (A3) | **100.0%** | 25.8% | see table |
-| Stopped at or before the first money-moving request | **92.5%** | — | — |
-| Detected before the first money-moving *attempt* | 85.0% | — | — |
-| Median events to detection / to first money call | 8 / 13 | — | — |
-| Money at risk / protected in the test month (synthetic) | ৳8,010,735 / **৳7,656,535** | — | — |
+| AUC / PR-AUC | **{{AUC}} / {{PRAUC}}** | — | Markov {{AUC_MK}}, IsoForest {{AUC_ISO}} |
+| Recall at 2% false friction | **{{RECALL}}** | {{RULE_RECALL}} at **{{RULE_FF}}** friction | {{UNSUP_RECALL}} at {{UNSUP_FF}} |
+| Recall on coerced victims (A3) | **{{RECALL}}** | {{RULE_A3}} | see table |
+| Stopped at or before the first money-moving request | **{{STOPPED}}** | — | — |
+| Detected before the first money-moving *attempt* | {{BEFORE_ATTEMPT}} | — | — |
+| Median events to detection / to first money call | {{MED_DETECT}} / {{MED_MONEY}} | — | — |
+| Money at risk / protected in the test month (synthetic) | ৳{{AT_RISK}} / **৳{{PROTECTED}}** | — | — |
 
 \* `new device & amount ≥ 40% cap` OR `> 3 transfers/min` OR `new recipient & night & amount ≥ 60% cap`. Rules miss the coerced victim because the victim *is* the human.
 \*\* Markov flow likelihood OR Isolation Forest above the 99th human percentile. **No labels used**, which is what catches attacks nobody has seen yet.
@@ -39,25 +39,17 @@ Train 51,657 sessions / test 12,625 sessions, split **by user** so per-user base
 
 | Attack archetype | Recall (ours) | Unsupervised | Rules | Stopped before money moved | Median detect event / money event |
 |---|---|---|---|---|---|
-| A1 Scripted ATO via reverse-engineered API | 100.0% | 100.0% | 100.0% | 100.0% | 1 / 4 |
-| A2 OTP-relay / SIM-swap takeover | 100.0% | 84.1% | 95.5% | 100.0% | 11 / 22 |
-| A3 Coerced victim on a scam call | 100.0% | 51.7% | 25.8% | 96.6% | 14 / 18 |
-| A5 Gambling / fake-purchase laundering | 100.0% | 47.9% | 97.9% | 43.8% | 14 / 11 |
-| A6 Emulator farm | 100.0% | 96.8% | 100.0% | 100.0% | 8 / 14 |
-| A7 Adaptive attacker (human-like timing) | 100.0% | 100.0% | 100.0% | 100.0% | 1 / 4 |
+{{ARCH_TABLE}}
 
 ### Operating curve: how much friction buys how much recall
 
 | False friction on genuine users | Threshold | Recall (all) | Recall A3 coerced | Recall A5 laundering |
 |---|---|---|---|---|
-| 0.250% | 0.1559 | 96.7% | 86.5% | 97.9% |
-| 0.500% | 0.0361 | 98.2% | 93.3% | 97.9% |
-| 1.000% | 0.0073 | 99.8% | 98.9% | 100.0% |
-| 2.000% | 0.001 | 100.0% | 100.0% | 100.0% |
+{{CURVE_TABLE}}
 
 ### Novel-attack test (what happens when the attacker invents something new)
 
-We removed **A5 (gambling laundering) from training entirely**. The supervised model, never having seen it, still catches 33.3%; the unsupervised layer catches 47.9% with no labels at all. With A5 in training, recall is 100%. This is why the system is layered rather than a single classifier.
+We removed **A5 (gambling laundering) from training entirely**. The supervised model, never having seen it, still catches {{NOV_SUP}}; the unsupervised layer catches {{NOV_UNSUP}} with no labels at all. With A5 in training, recall is 100%. This is why the system is layered rather than a single classifier.
 
 ### Adaptive attacker (A7)
 
@@ -69,39 +61,17 @@ False friction on **genuine** sessions at the operating point. Elderly and low-l
 
 | Slice | False friction |
 |---|---|
-| persona: elderly | 0.8% |
-| persona: rmg_worker | 1.3% |
-| persona: rural_lowlit | 1.6% |
-| persona: salaried | 2.7% |
-| persona: small_merchant | 2.3% |
-| persona: student | 1.6% |
-| age 18-25 | 1.8% |
-| age 26-40 | 2.2% |
-| age 41-55 | 1.5% |
-| age 56+ | 1.0% |
-| feature phone: False | 2.0% |
-| feature phone: True | 1.2% |
-| gender: F | 1.9% |
-| gender: M | 2.1% |
+{{FAIR_TABLE}}
 
 ### What drives the score (global SHAP, mean |value|)
 
 | Feature | Importance |
 |---|---|
-| mk_min_logp | 0.6453 |
-| frac_new_recipient | 0.5913 |
-| has_balance_check | 0.4823 |
-| money_total | 0.4682 |
-| money_max | 0.2703 |
-| mk_mean_nll | 0.2599 |
-| money_per_minute | 0.2362 |
-| hour | 0.2337 |
-| screen_ratio | 0.1558 |
-| ms_per_char_min | 0.1397 |
+{{SHAP_TABLE}}
 
 ### Account-role misuse (L4)
 
-Personal wallets behaving like unregistered merchants or agents (hundreds of inbound transfers from unique senders, round amounts, periodic bulk cash-out): AUC 1.0 on 15 positives in the test set. Separate problem, separate model, surfaced in the analyst console.
+Personal wallets behaving like unregistered merchants or agents (hundreds of inbound transfers from unique senders, round amounts, periodic bulk cash-out): AUC {{ACC_AUC}} on {{ACC_POS}} positives in the test set. Separate problem, separate model, surfaced in the analyst console.
 
 > **Honesty note.** All data is synthetic with injected patterns (see `data/ASSUMPTIONS.md`), so absolute numbers are optimistic. The *relative* results are the point: model vs rules, supervised vs unsupervised on novel attacks, detection latency vs the money call, and the fairness slices. Section "Path to real upay data" says how we would calibrate on reality.
 

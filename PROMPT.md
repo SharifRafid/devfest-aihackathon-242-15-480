@@ -37,3 +37,7 @@ How will I train the model and push the site live? It wont be possible on my dev
 ## [2026-10-07 09:55:09] Prompt #9
 
 The demo and everything is getting ready, but how can I make this presentable to the end judges so that they at least know at first glance that my idea is unique? FYI, there was a phase 1 of this hackathon that I missed and I'm attending the phase 2 without any submissions in the phase 1, so I will get a minus point for that, how much will it affect me?
+
+## [2026-10-07 10:03:52] Prompt #10
+
+It was most likely an idea stage submission, so create that according to the template in this repo and the nine step logic chain as well. Also suggest me on how I can enhance the overall presentation state of the repo so that I can get proper highlight on my core idea and uniqueness.
