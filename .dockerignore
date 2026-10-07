@@ -1,0 +1,10 @@
+.git
+.venv
+web/node_modules
+web/dist
+**/__pycache__
+*.pdf
+deck/
+*.md
+!data/ASSUMPTIONS.md
+.claude

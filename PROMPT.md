@@ -45,3 +45,7 @@ It was most likely an idea stage submission, so create that according to the tem
 ## [2026-10-07 10:16:19] Prompt #11
 
 The project and everything is now finished, do a final verification of everything before I submit the github. Also make sure the vercel link is on the readme and higlighted properly and also our main pitch line is noticeable. And the theme color of the upay app is yellow not pink, update that in the Customer Screen section. After making these changes run a final verification of the entire project and give me a go signal for submission.
+
+## [2026-10-07 10:37:13] Prompt #12
+
+Remove the prompts and git push hooks, from now on I will push and add the prompts only when needed.

@@ -121,4 +121,4 @@ Stack: Python · pandas · scikit-learn · LightGBM · SHAP · FastAPI · Vite +
 - Submission format confirmed with organizers (8.2) — **TODO ask now**.
 
 ## 11. Workflow tooling
-`PROMPT.md` auto-logs every prompt (hook). `/push` commits+pushes with files + prompts. `/autopush status|stop|start N` controls the 15-min loop (running).
+`PROMPT.md` holds the prompt history (rule 5.6). The auto-logging hook and the `/push` / `/autopush` loop were used during the build and removed afterwards; prompts are now added and pushes made manually.
