@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Second Thought — pitch deck</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  @page { size: 1280px 720px; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #0b0f17; color: #e6edf3; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Bengali", sans-serif; }
+  .slide { width: 1280px; height: 720px; padding: 56px 72px; position: relative; overflow: hidden; page-break-after: always; break-after: page; display: flex; flex-direction: column; border-bottom: 1px solid #ffffff10; }
+  .slide:last-child { page-break-after: auto; }
+  h1 { font-size: 54px; margin: 0 0 10px; letter-spacing: -.5px; }
+  h2 { font-size: 36px; margin: 0 0 22px; letter-spacing: -.3px; }
+  h3 { font-size: 20px; margin: 0 0 8px; color: #fff; }
+  p, li { font-size: 20px; line-height: 1.4; color: #c9d1d9; }
+  ul { margin: 0; padding-left: 22px; }
+  .pink { color: #ff4fa3; } .green { color: #34d399; } .red { color: #f87171; } .amber { color: #fbbf24; } .muted { color: #8b949e; }
+  .tag { position: absolute; top: 22px; right: 72px; font-size: 13px; color: #8b949e; letter-spacing: .08em; text-transform: uppercase; }
+  .n { position: absolute; bottom: 20px; right: 72px; font-size: 13px; color: #6e7681; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; flex: 1; }
+  .cols3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; flex: 1; }
+  .card { background: #0f1520; border: 1px solid #ffffff18; border-radius: 14px; padding: 20px 22px; }
+  .big { font-size: 64px; font-weight: 800; letter-spacing: -1px; line-height: 1; margin: 6px 0 4px; font-family: ui-monospace, Menlo, monospace; }
+  .kpi { font-size: 15px; color: #8b949e; }
+  table { border-collapse: collapse; width: 100%; font-size: 17px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #ffffff14; }
+  th { color: #8b949e; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: .05em; }
+  td.num { font-family: ui-monospace, Menlo, monospace; }
+  img.shot { width: 100%; border-radius: 10px; border: 1px solid #ffffff22; }
+  .quote { font-size: 26px; line-height: 1.35; color: #fff; border-left: 4px solid #ff4fa3; padding-left: 20px; margin: 18px 0; }
+  .flow { font-family: ui-monospace, Menlo, monospace; font-size: 15px; line-height: 1.5; color: #c9d1d9; background: #0f1520; border: 1px solid #ffffff18; border-radius: 12px; padding: 18px 22px; white-space: pre; }
+  .small { font-size: 15px; }
+</style>
+</head>
+<body>
+
+<section class="slide">
+  <div class="tag">AI Hackathon 2026 · DIU CPC × upay · Track 01</div>
+  <div style="margin-top:110px">
+    <div class="pink" style="font-size:22px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px">Second Thought</div>
+    <h1>Fraud models score the transaction.<br>We score the <span class="pink">path</span> to it.</h1>
+    <p style="font-size:24px;max-width:980px;margin-top:18px">A session-authenticity engine that watches the clickstream an MFS already collects — API calls, screens, timing, and this user's own history — and stops account takeover and scam-coerced transfers <b>before</b> <code>POST /transfer</code> executes.</p>
+  </div>
+  <div style="position:absolute;bottom:56px;left:72px" class="muted">Live demo · open-source repo · built in 4 hours with full prompt history</div>
+</section>
+
+<section class="slide">
+  <div class="tag">01 · Problem</div>
+  <h2>The app is hardened. The <span class="red">session</span> is not.</h2>
+  <div class="cols">
+    <div>
+      <ul>
+        <li>Obfuscation, OTP auto-fill, VPN detection, Play Integrity — attackers still reverse-engineer the APIs and drive accounts with scripts.</li>
+        <li>OTP relay and SIM swap give a stranger a fresh device and a victim's wallet.</li>
+        <li>Emulator farms, fake-merchant laundering, personal wallets run as unlicensed agents.</li>
+        <li>And the worst case: a scam caller talks a first-time, low-literacy user into sending the money <b>themselves</b>. Every transaction model sees a legitimate transfer.</li>
+      </ul>
+      <div class="quote">Every MFS already records every tap and every API call. Nobody asks that stream the only question that matters: <i>is this the owner, using the real app?</i></div>
+    </div>
+    <div class="card">
+      <h3>Why a transaction model is too late</h3>
+      <p class="small">By the time <code>POST /transfer</code> reaches a fraud model, the attacker already owns the session. The path there — no screens, no telemetry, 150 ms between calls, a recipient this user has never paid, an amount 6σ above their history — was visible <b>5–10 events earlier</b>.</p>
+      <h3 style="margin-top:18px">Who is hurt</h3>
+      <p class="small">Customers lose money and trust; upay absorbs disputes, chargebacks and reputational damage; analysts drown in alerts that arrive after the fact.</p>
+    </div>
+  </div>
+  <div class="n">2</div>
+</section>
+
+<section class="slide">
+  <div class="tag">02 · Solution</div>
+  <h2>Score every event. Intervene in proportion. Keep a human in the loop.</h2>
+  <div class="cols" style="grid-template-columns: 1.15fr 1fr">
+    <div class="flow">upay app / existing step-tracker ──events──▶ ingest
+                                           │
+          streaming feature engine (session prefix + this user's own past)
+                                           │
+   ┌──────────┬──────────────┬─────────────┼─────────────┬──────────────┐
+ L1 Markov   L2 LightGBM    L3 user      L4 account    L5 Isolation
+ flow model  + SHAP         baseline     role misuse   Forest
+ (no labels)                deviation                  (no labels)
+   └──────────┴──────────────┴─────────────┼─────────────┴──────────────┘
+                                   score + reasons
+                                           │
+                 policy engine  (rules, separate from ML, human oversight)
+         allow ── Second Thought screen ── step-up verify ── hold + analyst
+                                           │
+                          analyst label ──▶ retraining loop</div>
+    <div>
+      <div class="card" style="margin-bottom:14px"><h3>Three signal families, ~47 features, zero demographics</h3>
+        <p class="small"><b>Structure</b>: which events, in what order, what is <i>missing</i> (the real app always pings telemetry; a transfer without a PIN screen is a path skip).<br><b>Timing</b>: gap statistics, sub-300 ms fractions, typing speed, hesitation.<br><b>Baseline</b>: hours from <i>this user's</i> usual time, amount z-score vs <i>their</i> history, recipient novelty, pace vs <i>their</i> pace.</p></div>
+      <div class="card"><h3>Four tiers, never a model-only block</h3>
+        <p class="small"><span class="green">Allow</span> · <span class="amber">Second Thought</span>: genuine person, scam-like situation → plain Bangla explanation, 30 s cooling, an exit · <span style="color:#fb923c">Step-up</span>: likely not the owner → re-verify first · <span class="red">Hold</span>: not the genuine app → pause, analyst decides.</p></div>
+    </div>
+  </div>
+  <div class="n">3</div>
+</section>
+
+<section class="slide">
+  <div class="tag">03 · Demo</div>
+  <h2>Replay Theatre: three sessions, one engine, scored live</h2>
+  <img class="shot" src="img/replay.jpg" alt="Replay theatre">
+  <p class="small muted" style="margin-top:12px">Left: genuine user, score stays at 0. Middle: scripted ATO — <b>held at event 1</b>, before the first <code>/transfer</code> at event 3. Right: coerced victim — genuine device and rhythm, but first-ever recipient and ৳23,700 → <b>Second Thought</b> screen fires on the transfer request. "Attack me" generates a brand-new attack and scores it live.</p>
+  <div class="n">4</div>
+</section>
+
+<section class="slide">
+  <div class="tag">03 · Demo</div>
+  <h2>What the customer sees · what the analyst sees</h2>
+  <div class="cols" style="grid-template-columns: 0.9fr 1.1fr">
+    <div><img class="shot" src="img/phone.jpg" alt="Customer screen"><p class="small muted" style="margin-top:8px">Reasons come from SHAP drivers through a fixed sentence map — Bangla or English. No LLM on this screen, so nothing can hallucinate to a customer.</p></div>
+    <div><img class="shot" src="img/analyst.jpg" alt="Analyst console"><p class="small muted" style="margin-top:8px">Queue ranked by money at risk, SHAP reasons, policy rationale, the user's profile at that moment, one-click actions, and an LLM summary grounded only in the evidence JSON.</p></div>
+  </div>
+  <div class="n">5</div>
+</section>
+
+<section class="slide">
+  <div class="tag">04 · Results · held-out users</div>
+  <h2>Caught before the money moves, with 2% friction on genuine users</h2>
+  <div class="cols3" style="flex:0 0 auto;margin-bottom:22px">
+    <div class="card"><div class="kpi">Fraud stopped at or before the first money-moving request</div><div class="big green">92.5%</div><div class="kpi">median detection at event 8 · median money call at event 13</div></div>
+    <div class="card"><div class="kpi">Recall @ 2% false friction · AUC</div><div class="big">100%</div><div class="kpi">AUC 0.9998 · PR-AUC 0.994 · still 96.7% recall at 0.25% friction</div></div>
+    <div class="card"><div class="kpi">Rule baseline on the same data</div><div class="big red">82.7%</div><div class="kpi">at <b>12.1%</b> friction — and only 25.8% of coerced victims</div></div>
+  </div>
+  <table>
+    <tr><th>Archetype</th><th>Ours</th><th>Unsupervised only</th><th>Rules</th><th>Stopped before money</th><th>Detect / money event</th></tr>
+    <tr><td>A1 Scripted ATO via reverse-engineered API</td><td class="num">100%</td><td class="num">100%</td><td class="num">100%</td><td class="num">100%</td><td class="num">1 / 4</td></tr>
+    <tr><td>A2 OTP-relay / SIM-swap takeover</td><td class="num">100%</td><td class="num">84%</td><td class="num">95%</td><td class="num">100%</td><td class="num">11 / 22</td></tr>
+    <tr><td><b>A3 Coerced victim on a scam call</b></td><td class="num">100%</td><td class="num">52%</td><td class="num red">26%</td><td class="num">97%</td><td class="num">14 / 18</td></tr>
+    <tr><td>A5 Gambling / fake-purchase laundering</td><td class="num">100%</td><td class="num">48%</td><td class="num">98%</td><td class="num">44%</td><td class="num">14 / 11</td></tr>
+    <tr><td>A6 Emulator farm</td><td class="num">100%</td><td class="num">97%</td><td class="num">100%</td><td class="num">100%</td><td class="num">8 / 14</td></tr>
+    <tr><td>A7 Adaptive attacker (human-like timing)</td><td class="num">100%</td><td class="num">100%</td><td class="num">100%</td><td class="num">100%</td><td class="num">1 / 4</td></tr>
+  </table>
+  <p class="small muted" style="margin-top:10px">Synthetic data with injected patterns (documented): absolute numbers are optimistic; the relative results are the point.</p>
+  <div class="n">6</div>
+</section>
+
+<section class="slide">
+  <div class="tag">05 · The hard questions, answered with experiments</div>
+  <h2>Robust, fair, and honest about limits</h2>
+  <div class="cols3">
+    <div class="card"><h3>“Attackers will just add random delays.”</h3><p class="small">A7 is exactly that: log-normal human-like gaps plus replayed telemetry. Timing stops helping. Still caught at event 1 of every session, because the <b>path</b> (no screens, no PIN screen before <code>/transfer</code>) and the <b>user baseline</b> (first-ever recipient, 6σ amount) survive mimicry.</p></div>
+    <div class="card"><h3>“What about an attack you have never seen?”</h3><p class="small">We removed A5 from training entirely. The supervised model still caught 33%; the <b>label-free</b> Markov + Isolation Forest layer caught 48%. With A5 labelled: 100%. That gap is why the system is layered, and why analyst labels close the loop.</p></div>
+    <div class="card"><h3>“Won't slow elderly users get flagged?”</h3><p class="small">False friction on genuine users: elderly <b>0.8%</b>, rural low-literacy 1.6%, feature-phone 2.1%, students 1.6%, 56+ 1.0%. The baseline compares each user with <i>themselves</i>, so slow is normal for a slow user. Demographics are never inputs.</p></div>
+  </div>
+  <div class="cols3" style="margin-top:20px;flex:0 0 auto">
+    <div class="card"><h3>“Isn't this just velocity rules?”</h3><p class="small">Rules: 82.7% recall at 12.1% friction, 26% on coerced victims. Rules cannot see a genuine human in a scam; a per-user baseline can.</p></div>
+    <div class="card"><h3>Privacy & security</h3><p class="small">Behavioural metadata only. No PII features. The LLM only ever sees our evidence JSON — no prompt-injection surface. Keys in env; the engine has no write access to ledgers.</p></div>
+    <div class="card"><h3>Human oversight</h3><p class="small">Nothing is permanently blocked by a model. Hold and step-up go to a person with release / step-up / freeze / call. Every alert carries SHAP reasons and a rule trace.</p></div>
+  </div>
+  <div class="n">7</div>
+</section>
+
+<section class="slide">
+  <div class="tag">06 · Impact & path to production</div>
+  <h2>Zero app changes on day one. A dial, not a switch.</h2>
+  <div class="cols">
+    <div>
+      <div class="card" style="margin-bottom:14px"><h3>Business impact (synthetic test month, 600 users)</h3>
+        <p class="small">৳80.1 lakh at risk across 399 fraudulent sessions · <b>৳76.6 lakh protected</b> before money moved · at 2% friction, ~250 genuine sessions saw a 30-second confirm screen; none were blocked.<br>Per 1M active users at a realistic 0.3% fraud session rate, the same ratios imply tens of crores protected per year and a measurable drop in dispute volume. We would validate those economics in shadow mode, not claim them now.</p></div>
+      <div class="card"><h3>Why upay specifically</h3><p class="small">The data already exists in the step-tracker. The engine is a sidecar: no SDK, no new instrumentation. The policy tier becomes one synchronous call before <code>confirm</code>, p99 budget under 50 ms. Second Thought copy is Bangla-first for the users scams target most.</p></div>
+    </div>
+    <div class="card">
+      <h3>Six steps to real data</h3>
+      <ol style="padding-left:22px">
+        <li class="small"><b>Schema mapping</b> — event vocabulary ↔ existing analytics stream.</li>
+        <li class="small"><b>Shadow mode, 2 weeks</b> — score, do not act; learn the true base rate; set the friction budget on the operating curve.</li>
+        <li class="small"><b>Label bootstrap</b> — fraud cases and complaints become positives; the unsupervised layer proposes candidates.</li>
+        <li class="small"><b>A/B the Second Thought screen</b> — cancelled-by-customer, completed-then-disputed, friction complaints.</li>
+        <li class="small"><b>Integrate</b> — synchronous tier decision before confirm.</li>
+        <li class="small"><b>Govern</b> — model card, monthly fairness report, drift monitors, retraining cadence from analyst labels.</li>
+      </ol>
+      <p class="small muted" style="margin-top:10px">Roadmap: sequence model (GRU) as L6, device-graph features, typed-decision layer for the tier choice.</p>
+    </div>
+  </div>
+  <div class="n">8</div>
+</section>
+
+<section class="slide">
+  <div class="tag">Close</div>
+  <div style="margin-top:120px">
+    <h1>Stop asking “is this transaction fraud?”<br>Ask “<span class="pink">is this the owner, using the real app?</span>”</h1>
+    <p style="font-size:24px;margin-top:24px">Second Thought · live demo, open repo, reproducible metrics, every prompt logged.</p>
+    <p class="muted">Python · LightGBM · SHAP · FastAPI · React · synthetic data only · built solo in 4 hours with Claude Code</p>
+  </div>
+  <div class="n">9</div>
+</section>
+
+</body>
+</html>

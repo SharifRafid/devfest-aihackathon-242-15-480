@@ -4,7 +4,7 @@
 
 > Fraud models score the **transaction**. Second Thought scores the **path to the transaction**: the sequence of API calls and screens, the timing between them, the signals the genuine app always emits, and how all of that compares with *this user's own history*. By the time a transaction model sees the transfer, the attacker already owns the session. Flow and timing are visible 5–10 events earlier.
 
-![Replay Theatre](deck/img/replay.png)
+![Replay Theatre](deck/img/replay.jpg)
 
 ## The problem
 

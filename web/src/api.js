@@ -6,7 +6,7 @@ const cache = {}
 async function st(name) { if (!cache[name]) cache[name] = fetch(`/static/${name}.json`).then(r => { if (!r.ok) throw new Error('static missing'); return r.json() }); return cache[name] }
 async function live(url, opts) {
   const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 2500)
-  try { const r = await fetch(BASE + url, { ...opts, signal: ctl.signal }); if (!r.ok) throw new Error(await r.text()); mode = 'live'; return r.json() }
+  try { const r = await fetch(BASE + url, { ...opts, signal: ctl.signal }); if (!r.ok) throw new Error(await r.text()); const data = await r.json(); mode = 'live'; return data }
   finally { clearTimeout(t) }
 }
 async function j(url, opts, fallback) {
