@@ -13,3 +13,25 @@ I think your suggested idea is too common and most people will definitely choose
 ## [2026-10-07 09:25:00] Prompt #3
 
 I think the Second Thought wrong-number and coercion guard seems like one of the most important things an mfs needs right now, nowadays people use these mfs apps by reverse engineering their APIs to login accounts that are not their own and make fraudulent transactions like stealing money, making fake purchases, gambling, using personal accounts as agents or merchants for handling regular payments etc, these things keep happening even after all the security these apps enforce like code obfuscation, otp autofill and no manual otp entry, vpn detection, play integrity check etc but even after all these the hackers always figure out a way to bypass all these and still make fraudulant transactions or hack into other peoples accounts. So what if we can make an AI system that will track every single API call the user makes since the starting of onboarding, the timing difference between the calls, the transactions he makes, the pages he visits and the pages he hops over, upay already has the system for tracking the users steps but I dont think any mfs yet has any analysis running against those steps to validate if that is an actual authentic user's traffic or the flow seems suspicious, I think this will be a game changer for the mfs industry especially due to the increased number of mfs frauds and other hacks of especially less literate people as the customer base rises. Now I want you to help me plan this and guide me on this.
+
+## [2026-10-07 09:32:30] Prompt #4
+
+Can we use Jev AI for this as its far more efficient than other AI models and extremely fast and we only need to make decisions?
+
+## [2026-10-07 09:36:31] Prompt #5
+
+I don't have the jev key at hand, what is your suggestion at the moment for me?
+
+## [2026-10-07 09:36:56] Prompt #6
+
+go
+
+## [2026-10-07 09:44:15] Prompt #7
+
+<task-notification>
+<task-id>bzgc2fl8y</task-id>
+<tool-use-id>toolu_01Gfzzfk5TnA7tGfDCCnWC3h</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-sharifrafid-Projects-devfest-aihackathon-242-15-480/a7072128-d2b0-44e7-9605-eac2eb2a03f8/tasks/bzgc2fl8y.output</output-file>
+<status>failed</status>
+<summary>Background command "Create Python venv and install ML and API dependencies" failed with exit code 144</summary>
+</task-notification>
