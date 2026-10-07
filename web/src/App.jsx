@@ -22,7 +22,7 @@ export default function App() {
             {TABS.map(([k, l, I]) => <button key={k} onClick={() => setTab(k)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm ${tab === k ? 'bg-white/15' : 'hover:bg-white/5 text-white/70'}`}><I size={14} /> {l}</button>)}
           </nav>
           {metrics && <div className="hidden md:flex gap-4 text-[11px] text-white/50 mono">
-            <span>AUC {metrics.auc}</span><span>recall {(metrics.operating_point.recall * 100).toFixed(0)}% @ {(metrics.operating_point.false_friction * 100).toFixed(1)}% friction</span><span>stopped before money {(lat.stopped_at_or_before_first_money_request * 100).toFixed(0)}%</span><span className={health?.ok ? 'text-emerald-300' : 'text-red-300'}>{health?.ok ? 'API live' : 'API down'}</span>
+            <span>AUC {metrics.auc}</span><span>recall {(metrics.operating_point.recall * 100).toFixed(0)}% @ {(metrics.operating_point.false_friction * 100).toFixed(1)}% friction</span><span>stopped before money {(lat.stopped_at_or_before_first_money_request * 100).toFixed(0)}%</span><span className={health?.ok ? 'text-emerald-300' : 'text-red-300'}>{health?.static ? 'snapshot mode (no backend)' : health?.ok ? 'API live' : 'API down'}</span>
           </div>}
         </div>
       </header>
