@@ -5,14 +5,14 @@
 <h2 align="center">Fraud models score the <em>transaction</em>.<br>Second Thought scores the <em>path to the transaction</em>.</h2>
 
 <p align="center">
-  <a href="https://second-thought-pink.vercel.app"><img src="https://img.shields.io/badge/LIVE%20DEMO-second--thought--pink.vercel.app-FFC20E?style=for-the-badge&logo=vercel&logoColor=black" alt="Live demo"></a>
+  <a href="https://secondthought.dubd.site"><img src="https://img.shields.io/badge/LIVE%20DEMO-secondthought.dubd.site-FFC20E?style=for-the-badge&logoColor=black" alt="Live demo"></a>
   &nbsp;
   <a href="deck/SecondThought-deck.pdf"><img src="https://img.shields.io/badge/PITCH%20DECK-PDF-0b0f17?style=for-the-badge" alt="Pitch deck"></a>
   &nbsp;
   <a href="IDEA.md"><img src="https://img.shields.io/badge/IDEA%20SUBMISSION-template%20%2B%209--step%20chain-0b0f17?style=for-the-badge" alt="Idea submission"></a>
 </p>
 
-<p align="center"><b>🔗 Live demo: <a href="https://second-thought-pink.vercel.app">https://second-thought-pink.vercel.app</a></b> · no backend needed, runs on exported snapshots of the real API · <a href="STRATEGY.md">strategy &amp; threat model</a> · <a href="PROMPT.md">every prompt used</a></p>
+<p align="center"><b>🔗 Live demo: <a href="https://secondthought.dubd.site">https://secondthought.dubd.site</a></b> · live model + live "Attack me" simulation (full stack in one container) · mirror: <a href="https://second-thought-pink.vercel.app">second-thought-pink.vercel.app</a> (static snapshot) · <a href="STRATEGY.md">strategy &amp; threat model</a> · <a href="PROMPT.md">every prompt used</a></p>
 
 > By the time a transaction model sees the transfer, the attacker already owns the session. The sequence of API calls and screens, the timing between them, the telemetry the genuine app always emits, and how all of that compares with *this user's own history* are visible **5–10 events earlier**. Second Thought scores that path, event by event, and intervenes **before `POST /transfer` executes**.
 
@@ -174,7 +174,7 @@ make api          # FastAPI on :8000
 make web          # Vite on :5173 (proxies /api -> :8000)
 ```
 Optional `.env`: `ANTHROPIC_API_KEY` for LLM analyst narratives (template fallback otherwise), `JEV_API_KEY` for the typed-decision layer (local policy otherwise).
-`python scripts/export_static.py` snapshots every demo payload to `web/public/static/` so the site also runs with no backend (that is how the hosted demo works).
+`python scripts/export_static.py` snapshots every demo payload to `web/public/static/` so the site also runs with no backend (the Vercel mirror). The primary demo at secondthought.dubd.site runs the full stack from the `Dockerfile` (API at `/api`, demo at `/`): `docker build -t second-thought . && docker run -p 8000:8000 second-thought`.
 
 ## Repository map
 
