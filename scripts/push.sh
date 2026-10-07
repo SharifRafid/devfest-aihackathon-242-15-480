@@ -14,9 +14,12 @@ fi
 # prompts since last push
 last=0; [ -f "$marker" ] && last="$(cat "$marker")"
 total=$(grep -c '^## \[' PROMPT.md 2>/dev/null || echo 0)
-prompts=""
-if [ "$total" -gt "$last" ]; then
-  prompts="$(awk -v last="$last" '
+prompts=""; label="Prompts used (from PROMPT.md)"
+from="$last"
+# no new prompt since last push -> this commit continues the most recent prompt
+if [ "$total" -le "$last" ] && [ "$total" -gt 0 ]; then from=$((total-1)); label="Continues prompt (from PROMPT.md)"; fi
+if [ "$total" -gt "$from" ]; then
+  prompts="$(awk -v last="$from" '
     /^## \[/ { n++; if (n>last) { inblk=1; sub(/^## /,""); hdr=$0; next } else inblk=0 }
     inblk && NF { if (hdr!="") { printf "- (%s) ", hdr; hdr="" } else printf "  "; print }
   ' PROMPT.md)"
@@ -27,7 +30,8 @@ stat="$(git diff --cached --stat | tail -1 | sed 's/^ *//')"
 files="$(git diff --cached --name-status | awk '{printf "%s %s\n", ($1=="A"?"added":($1=="D"?"deleted":($1~/^R/?"renamed":"modified"))), $NF}')"
 
 # subject: first new prompt (truncated) or generic
-first="$(printf '%s' "$prompts" | grep -m1 '^- (' | sed -E 's/^- \([^)]*\) //' | tr -d '\n' | cut -c1-60)"
+first="$(printf '%s' "$prompts" | { grep -m1 '^- (' || true; } | sed -E 's/^- \([^)]*\) //' | tr -d '\n' | cut -c1-60)"
+[ "$label" != "Prompts used (from PROMPT.md)" ] && [ -n "$first" ] && first="(cont.) $first"
 subject="${first:-snapshot: $(date '+%H:%M')}"
 [ ${#first} -ge 60 ] && subject="$subject..."
 
@@ -38,7 +42,7 @@ $files
 "
 if [ -n "$prompts" ]; then
   msg="$msg
-Prompts used (from PROMPT.md):
+$label:
 $prompts
 "
 fi
