@@ -140,8 +140,11 @@ def session_features(events: list[dict], profile: UserProfile, markov: MarkovFlo
     apis = [x for x in names if x.startswith("a_")]
     tel = sum(1 for x in names if x in TELEMETRY)
     money_ev = [e for e in events if e["event"] in MONEY_API and e.get("ok", 1)]
-    amounts = [float(e.get("amount", 0) or 0) for e in money_ev]
-    recips = [e.get("recipient_id", "") for e in money_ev if e.get("recipient_id")]
+    amounts = [float(e.get("amount", 0) or 0) for e in money_ev]                       # money that actually moved
+    intended = [float(e.get("amount", 0) or 0) for e in events if float(e.get("amount", 0) or 0) > 0]  # incl. amount typed on screens / pending request
+    # recipient novelty is visible as soon as the app resolves/adds/shows a recipient, before any money moves
+    recips = [e.get("recipient_id", "") for e in events if e.get("recipient_id")]
+    recips = list(dict.fromkeys(recips))
     known = sum(1 for r in recips if r in profile.recipients)
     new_rec = len(recips) - known
 
@@ -167,7 +170,7 @@ def session_features(events: list[dict], profile: UserProfile, markov: MarkovFlo
     uh = profile.usual_hour()
     hour_dev = circ_hour_dist(first_hour, uh) if uh is not None else 0.0
     am, asd = profile.amount_stats()
-    amount_z = ((math.log(max(amounts)) - am) / asd) if (amounts and am is not None) else 0.0
+    amount_z = ((math.log(max(intended)) - am) / asd) if (intended and am is not None) else 0.0
     base_dwell = float(np.median(profile.confirm_dwell)) if profile.confirm_dwell else None
     hes = (confirm_dwell / base_dwell) if (base_dwell and confirm_dwell > 0) else 1.0
     base_dt = float(np.median(profile.dt_median)) if profile.dt_median else None
@@ -177,8 +180,8 @@ def session_features(events: list[dict], profile: UserProfile, markov: MarkovFlo
     f = dict(
         n_events=n, n_screens=len(screens), n_api=len(apis), screen_ratio=len(screens) / n,
         telemetry_count=tel, telemetry_ratio=tel / max(len(apis), 1), no_telemetry=int(tel == 0 and len(apis) >= 2),
-        n_money=len(money_ev), money_total=sum(amounts), money_max=max(amounts) if amounts else 0.0,
-        amount_frac_cap=(max(amounts) / DAILY_CAP) if amounts else 0.0,
+        n_money=len(money_ev), money_total=sum(amounts), money_max=max(intended) if intended else 0.0,
+        amount_frac_cap=(max(intended) / DAILY_CAP) if intended else 0.0,
         new_recipient_count=new_rec, frac_new_recipient=(new_rec / len(recips)) if recips else 0.0,
         pin_errors=sum(int(e.get("pin_error", 0)) for e in events),
         has_pinchange=int("a_pinchange" in names), has_add_beneficiary=int("a_add_beneficiary" in names),
@@ -210,22 +213,24 @@ def session_summary_for_profile(events: list[dict]):
 
 # ---------------------------------------------------------------- dataset builder
 def build_dataset(events: pd.DataFrame, sessions: pd.DataFrame, markov: MarkovFlow, device_counts: dict,
-                  known_devices: dict | None = None, progress: bool = False):
+                  snapshot_ids: set | None = None, progress: bool = False):
     """Walk every user's sessions chronologically, scoring each against the profile built from its past.
-    Returns (X DataFrame indexed by session_id, profiles dict user_id -> UserProfile at end of data)."""
+    Returns (X, profiles at end of data, snapshots: {session_id: (UserProfile-before-session, new_device)} for snapshot_ids)."""
+    import copy
     cols = ["event", "dt_ms", "amount", "recipient_id", "pin_error", "ok", "ts", "session_id"]
     ev_sorted = events.sort_values(["session_id", "idx"])
     grouped = {sid: g[cols].to_dict("records") for sid, g in ev_sorted.groupby("session_id", sort=False)}
-    rows, profiles = [], {}
+    rows, profiles, snapshots = [], {}, {}
     sess_sorted = sessions.sort_values(["user_id", "start_ts"])
     seen_devices: dict[str, set] = defaultdict(set)
     for i, s in enumerate(sess_sorted.itertuples(index=False)):
         prof = profiles.setdefault(s.user_id, UserProfile())
         evs = grouped[s.session_id]
         nd = int(s.device_id not in seen_devices[s.user_id]) if seen_devices[s.user_id] else 0
+        if snapshot_ids and s.session_id in snapshot_ids: snapshots[s.session_id] = (copy.deepcopy(prof), nd)
         f = session_features(evs, prof, markov, device_user_count=device_counts.get(s.device_id, 1), new_device=nd)
         f["session_id"] = s.session_id; rows.append(f)
         prof.update(**session_summary_for_profile(evs)); seen_devices[s.user_id].add(s.device_id)
         if progress and i % 5000 == 0: print(f"  featurized {i:,}/{len(sess_sorted):,}")
     X = pd.DataFrame(rows).set_index("session_id")
-    return X, profiles
+    return X, profiles, snapshots

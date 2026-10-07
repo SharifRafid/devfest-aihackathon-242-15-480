@@ -118,12 +118,12 @@ class SessionBuilder:
         self.events.append(row)
 
     # --- genuine-app primitives (screens + their telemetry) ---
-    def screen(self, name, mult=1.0, chars=None):
+    def screen(self, name, mult=1.0, chars=None, **kw):
         base, sig = BASE_DWELL[name]
         d = ln(self.rng, base, sig) * self.p.dwell_mult * self.u["speed_mult"] * mult
         if chars:
             d += chars * self.p.ms_per_char * self.u["speed_mult"] * float(self.rng.lognormal(0, .25))
-        self.ev(name, d)
+        self.ev(name, d, **kw)
         self.maybe_heartbeat()
 
     def api(self, name, lat_mult=1.0, **kw):
@@ -145,8 +145,8 @@ class SessionBuilder:
         if self.rng.random() < self.p.back_p * .5: self.screen("s_home", .5); self.screen("s_send", .5)
         self.screen("s_recipient", chars=11)
         self.api("a_resolve_recipient", recipient=recipient, recipient_new=recipient_new)
-        self.screen("s_amount", mult=hesitation, chars=len(str(int(amount))))
-        self.screen("s_confirm", mult=hesitation)
+        self.screen("s_amount", mult=hesitation, chars=len(str(int(amount))), amount=amount, recipient=recipient, recipient_new=recipient_new)
+        self.screen("s_confirm", mult=hesitation, amount=amount, recipient=recipient, recipient_new=recipient_new)
         errs = forced_pin_err if forced_pin_err is not None else (self.rng.random() < self.p.pin_err_p)
         for _ in range(int(errs)):
             self.screen("s_pin", chars=5); self.api("a_transfer", ok=0, pin_error=1, amount=amount, recipient=recipient, recipient_new=recipient_new)
@@ -157,7 +157,7 @@ class SessionBuilder:
         self.screen("s_success"); self.api("a_ping")
 
     def simple_money(self, screen, api, amount, recipient="", recipient_new=0):
-        self.screen(screen, chars=6)
+        self.screen(screen, chars=6, amount=amount, recipient=recipient, recipient_new=recipient_new)
         self.screen("s_pin", chars=5)
         self.api(api, amount=amount, recipient=recipient, recipient_new=recipient_new, lat_mult=1.6)
         self.money += amount; self.n_money += 1; self.new_recips += recipient_new
@@ -182,6 +182,22 @@ def human_session(rng, user, start_ts, persona, device, new_device):
     intents = list(persona.intents.items()); names = [k for k, _ in intents]; w = np.array([v for _, v in intents]); w /= w.sum()
     n_actions = 1 + int(rng.random() < .35) + int(rng.random() < .1)
     if rng.random() < 0.55: b.screen("s_balance")
+    roll = rng.random()
+    if roll < 0.035:
+        # hard negative: legitimate big payment to a never-seen recipient (tuition, landlord, new family member) with natural hesitation
+        r = f"R{uuid.uuid4().hex[:6]}"
+        b.send_money(r, 1, b.amount(frac_cap=float(rng.uniform(.3, 1.0))), hesitation=float(rng.uniform(1.2, 3.0)),
+                     forced_pin_err=int(rng.random() < persona.pin_err_p * 2))
+        n_actions = int(rng.random() < .3)
+    elif roll < 0.045:
+        # hard negative: late-night food/merchant payments
+        for _ in range(int(rng.integers(2, 4))):
+            b.simple_money("s_qr", "a_merchantpay", float(rng.choice([250, 400, 500, 800, 1200])), recipient=f"M{rng.integers(0, 400):04d}", recipient_new=int(rng.random() < .5))
+        n_actions = 0
+    elif roll < 0.055 and new_device:
+        # hard negative: genuine new phone setup -> pin change / add beneficiary
+        b.screen("s_profile"); b.screen("s_pinchange", chars=10); b.api("a_pinchange")
+        if rng.random() < .5: b.screen("s_beneficiary", chars=11); b.api("a_add_beneficiary", recipient_new=1)
     for _ in range(n_actions):
         it = rng.choice(names, p=w)
         if it == "send":
@@ -203,13 +219,16 @@ def a1_scripted(rng, user, start_ts, persona, device, adaptive=False):
     """Reverse-engineered API client. No screens, no telemetry. A7 = same with human-like jitter."""
     b = SessionBuilder(rng, user, start_ts, device, "fraud", "A7_adaptive_scripted" if adaptive else "A1_scripted_api", persona)
     gap = (lambda: ln(rng, 2500, .6)) if adaptive else (lambda: float(rng.uniform(90, 320)))
+    mimic = rng.random() < (.6 if adaptive else .25)   # some scripts replay telemetry calls too
     b.ev("a_login", gap())
+    if mimic: b.ev("a_ping", gap())
     if rng.random() < .3: b.ev("a_otp", gap())
     if rng.random() < .5: b.ev("a_balance", gap())
+    if mimic and rng.random() < .7: b.ev("a_offers", gap())
     for _ in range(int(rng.integers(1, 5))):
         r, new = f"R{uuid.uuid4().hex[:6]}", 1
         if rng.random() < .5: b.ev("a_resolve_recipient", gap(), recipient=r, recipient_new=1)
-        amt = b.amount(frac_cap=float(rng.uniform(.3, 1.0)))
+        amt = b.amount(frac_cap=float(rng.uniform(.02, .12)) if rng.random() < .2 else float(rng.uniform(.2, 1.0)))  # 20% small probing transfers
         b.ev("a_transfer", gap() + ln(rng, 400, .3), amount=amt, recipient=r, recipient_new=1)
         b.money += amt; b.n_money += 1; b.new_recips += 1
     return b
@@ -220,10 +239,10 @@ def a2_otp_relay(rng, user, start_ts, persona, device):
     b = SessionBuilder(rng, user, start_ts, device, "fraud", "A2_otp_relay_takeover", persona)
     b.p = PERSONAS[0]  # attacker types fast regardless of victim persona
     b.login(new_device=True)
-    b.screen("s_profile", .5); b.screen("s_pinchange", .6, chars=10); b.api("a_pinchange")
-    b.screen("s_beneficiary", .6, chars=11); b.api("a_add_beneficiary", recipient_new=1)
+    if rng.random() < .6: b.screen("s_profile", .5); b.screen("s_pinchange", .6, chars=10); b.api("a_pinchange")
+    if rng.random() < .6: b.screen("s_beneficiary", .6, chars=11); b.api("a_add_beneficiary", recipient_new=1)
     r = f"R{uuid.uuid4().hex[:6]}"
-    b.send_money(r, 1, b.amount(frac_cap=float(rng.uniform(.8, 1.0))), hesitation=.5, forced_pin_err=0)
+    b.send_money(r, 1, b.amount(frac_cap=float(rng.uniform(.5, 1.0))), hesitation=float(rng.uniform(.4, 1.0)), forced_pin_err=0)
     if rng.random() < .5: b.simple_money("s_cashout", "a_cashout", b.amount(frac_cap=.5))
     return b
 
@@ -235,8 +254,8 @@ def a3_coerced(rng, user, start_ts, persona, device):
     if rng.random() < .4: b.screen("s_balance"); b.api("a_balance")
     if rng.random() < .25: b.screen("s_help", 1.5)
     r = f"R{uuid.uuid4().hex[:6]}"
-    b.send_money(r, 1, b.amount(frac_cap=float(rng.uniform(.6, 1.0))), hesitation=float(rng.uniform(2.0, 4.0)),
-                 forced_pin_err=int(rng.random() < .55) + int(rng.random() < .25))
+    b.send_money(r, 1, b.amount(frac_cap=float(rng.uniform(.25, 1.0))), hesitation=float(rng.uniform(1.0, 4.0)),
+                 forced_pin_err=int(rng.random() < .4) + int(rng.random() < .2))
     if rng.random() < .35:
         b.send_money(r, 0, b.amount(frac_cap=float(rng.uniform(.3, .6))), hesitation=1.5)
     return b
@@ -247,9 +266,9 @@ def a5_gambling(rng, user, start_ts, persona, device):
     b = SessionBuilder(rng, user, start_ts, device, "fraud", "A5_gambling_laundering", persona)
     b.p = PERSONAS[0]
     b.login(new_device=bool(rng.random() < .3))
-    merchants = [f"MX{rng.integers(0, 30):03d}" for _ in range(2)]
-    for _ in range(int(rng.integers(3, 7))):
-        b.simple_money("s_qr", "a_merchantpay", float(rng.choice([500, 1000, 2000, 5000])), recipient=str(rng.choice(merchants)), recipient_new=1)
+    merchants = [f"MX{rng.integers(0, 30):03d}" for _ in range(int(rng.integers(1, 4)))]
+    for _ in range(int(rng.integers(2, 7))):
+        b.simple_money("s_qr", "a_merchantpay", float(rng.choice([300, 500, 1000, 1500, 2000, 5000])), recipient=str(rng.choice(merchants)), recipient_new=int(rng.random() < .8))
     if rng.random() < .5: b.simple_money("s_cashout", "a_cashout", b.amount(frac_cap=.4))
     return b
 
@@ -259,11 +278,12 @@ def a6_emulator(rng, user, start_ts, persona, device, farm_seed):
     b = SessionBuilder(rng, user, start_ts, device, "fraud", "A6_emulator_farm", persona)
     frng = np.random.default_rng(farm_seed)
     sig = {k: float(frng.uniform(600, 1400)) for k in BASE_DWELL}  # farm-wide fixed dwell per screen
-    def scr(name): b.ev(name, sig[name] * float(rng.normal(1, .03)))
-    def api(name, **kw): b.ev(name, 180 * float(rng.normal(1, .05)), **kw)
+    def scr(name): b.ev(name, sig[name] * float(rng.normal(1, .08)))
+    def api(name, **kw): b.ev(name, 180 * float(rng.normal(1, .1)), **kw)
     scr("s_splash"); api("a_ping"); scr("s_login"); api("a_login"); scr("s_home"); api("a_balance"); api("a_offers")
+    if rng.random() < .4: scr("s_balance"); api("a_balance")
     scr("s_send"); scr("s_recipient"); r = f"R{uuid.uuid4().hex[:6]}"; api("a_resolve_recipient", recipient=r, recipient_new=1)
-    scr("s_amount"); scr("s_confirm"); scr("s_pin"); amt = float(rng.choice([480, 490, 495, 500]))
+    amt = float(rng.choice([480, 490, 495, 500])); b.ev("s_amount", sig["s_amount"] * float(rng.normal(1, .08)), amount=amt, recipient=r, recipient_new=1); b.ev("s_confirm", sig["s_confirm"] * float(rng.normal(1, .08)), amount=amt, recipient=r, recipient_new=1); scr("s_pin")
     api("a_transfer", amount=amt, recipient=r, recipient_new=1); b.money += amt; b.n_money += 1; b.new_recips += 1
     scr("s_success")
     return b
@@ -284,6 +304,7 @@ def generate(n_users=3000, days=30, seed=7, prevalence=None):
         for _ in range(n_sess):
             day = int(rng.integers(0, days))
             hour = float(np.clip(rng.normal(u["usual_hour"], u["hour_sd"]), 0, 23.99))
+            if rng.random() < .04: hour = float(rng.uniform(0, 5))
             start = t0 + day * 86_400_000 + int(hour * 3_600_000)
             roll = rng.random(); acc = 0.0; arch = "human"
             for k, v in prevalence.items():
@@ -304,7 +325,7 @@ def generate(n_users=3000, days=30, seed=7, prevalence=None):
                 start = t0 + day * 86_400_000 + int((rng.uniform(10, 23) if rng.random() < .7 else rng.uniform(0, 5)) * 3_600_000)
                 b = a3_coerced(rng, u, start, p, device)
             elif arch == "A5":
-                start = t0 + day * 86_400_000 + int(rng.uniform(22, 29) % 24 * 3_600_000)
+                start = t0 + day * 86_400_000 + int((rng.uniform(22, 29) % 24 if rng.random() < .7 else rng.uniform(8, 22)) * 3_600_000)
                 b = a5_gambling(rng, u, start, p, device)
             elif arch == "A6": b = a6_emulator(rng, u, start, p, str(rng.choice(farm_devices)), farm_seed=seed)
             evs = b.events
