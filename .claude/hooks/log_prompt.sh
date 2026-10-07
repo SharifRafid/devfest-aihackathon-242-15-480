@@ -8,6 +8,8 @@ root="${CLAUDE_PROJECT_DIR:-$(printf '%s' "$input" | jq -r '.cwd // empty')}"
 file="$root/PROMPT.md"
 prompt="$(printf '%s' "$input" | jq -r '.prompt // empty')"
 [ -z "$prompt" ] && exit 0
+# skip harness-generated turns (background task notifications, system notices) — only real human prompts are logged
+case "$prompt" in \<task-notification\>*|*"[SYSTEM NOTIFICATION"*|\<system-reminder\>*|\<local-command*) exit 0 ;; esac
 # skip slash commands that are just housekeeping
 case "$prompt" in /push*|/autopush*|/clear*|/compact*|/effort*|/model*|/cost*|/help*) exit 0 ;; esac
 [ -f "$file" ] || printf '# Prompt Log\n\nEvery prompt entered in Claude Code for this project, in order.\n' > "$file"

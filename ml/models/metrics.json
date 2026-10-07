@@ -1,18 +1,18 @@
 {
   "model": "LightGBM",
-  "n_train": 51593,
-  "n_test": 12985,
-  "fraud_rate_test": 0.0346,
+  "n_train": 51657,
+  "n_test": 12625,
+  "fraud_rate_test": 0.0316,
   "auc": 0.9998,
-  "pr_auc": 0.9959,
-  "auc_markov_only": 0.8957,
-  "auc_isoforest_only": 0.9914,
+  "pr_auc": 0.9936,
+  "auc_markov_only": 0.8666,
+  "auc_isoforest_only": 0.9871,
   "operating_point": {
     "target_false_friction": 0.02,
-    "threshold": 0.0014,
-    "threshold_1pct": 0.0087,
+    "threshold": 0.001,
+    "threshold_1pct": 0.0073,
     "recall": 1.0,
-    "precision": 0.6414,
+    "precision": 0.6196,
     "false_friction": 0.02
   },
   "recall_by_archetype": {
@@ -25,43 +25,43 @@
   },
   "operating_curve": {
     "0.250%": {
-      "threshold": 0.2592,
-      "recall": 0.98,
+      "threshold": 0.1559,
+      "recall": 0.9674,
       "recall_by_archetype": {
         "A1_scripted_api": 1.0,
         "A2_otp_relay_takeover": 1.0,
-        "A3_coerced_victim": 0.9589,
-        "A5_gambling_laundering": 0.8983,
+        "A3_coerced_victim": 0.8652,
+        "A5_gambling_laundering": 0.9792,
         "A6_emulator_farm": 1.0,
         "A7_adaptive_scripted": 1.0
       }
     },
     "0.500%": {
-      "threshold": 0.0809,
-      "recall": 0.9866,
+      "threshold": 0.0361,
+      "recall": 0.9825,
       "recall_by_archetype": {
         "A1_scripted_api": 1.0,
         "A2_otp_relay_takeover": 1.0,
-        "A3_coerced_victim": 0.9589,
-        "A5_gambling_laundering": 0.9492,
+        "A3_coerced_victim": 0.9326,
+        "A5_gambling_laundering": 0.9792,
         "A6_emulator_farm": 1.0,
         "A7_adaptive_scripted": 1.0
       }
     },
     "1.000%": {
-      "threshold": 0.0087,
-      "recall": 0.9978,
+      "threshold": 0.0073,
+      "recall": 0.9975,
       "recall_by_archetype": {
         "A1_scripted_api": 1.0,
         "A2_otp_relay_takeover": 1.0,
-        "A3_coerced_victim": 0.9863,
+        "A3_coerced_victim": 0.9888,
         "A5_gambling_laundering": 1.0,
         "A6_emulator_farm": 1.0,
         "A7_adaptive_scripted": 1.0
       }
     },
     "2.000%": {
-      "threshold": 0.0014,
+      "threshold": 0.001,
       "recall": 1.0,
       "recall_by_archetype": {
         "A1_scripted_api": 1.0,
@@ -75,127 +75,127 @@
   },
   "rule_baseline": {
     "description": "flag if (new_device and amount>=40% cap) or money_per_minute>3 or (new recipient and night and amount>=60% cap)",
-    "recall": 0.8575,
-    "false_friction": 0.1256,
+    "recall": 0.8271,
+    "false_friction": 0.1211,
     "recall_by_archetype": {
       "A1_scripted_api": 1.0,
-      "A2_otp_relay_takeover": 0.971,
-      "A3_coerced_victim": 0.1644,
-      "A5_gambling_laundering": 0.9831,
+      "A2_otp_relay_takeover": 0.9545,
+      "A3_coerced_victim": 0.2584,
+      "A5_gambling_laundering": 0.9792,
       "A6_emulator_farm": 1.0,
       "A7_adaptive_scripted": 1.0
     }
   },
   "unsupervised_only": {
     "description": "L1 Markov OR L5 IsolationForest above 99th human percentile (no labels used)",
-    "recall": 0.8575,
-    "false_friction": 0.0195,
+    "recall": 0.807,
+    "false_friction": 0.0196,
     "recall_by_archetype": {
       "A1_scripted_api": 1.0,
-      "A2_otp_relay_takeover": 0.913,
-      "A3_coerced_victim": 0.5342,
-      "A5_gambling_laundering": 0.6949,
-      "A6_emulator_farm": 0.913,
+      "A2_otp_relay_takeover": 0.8409,
+      "A3_coerced_victim": 0.5169,
+      "A5_gambling_laundering": 0.4792,
+      "A6_emulator_farm": 0.9677,
       "A7_adaptive_scripted": 1.0
     }
   },
   "fairness_false_friction_by_slice": {
     "persona": {
-      "elderly": 0.0081,
-      "rmg_worker": 0.0233,
-      "rural_lowlit": 0.0138,
-      "salaried": 0.0266,
-      "small_merchant": 0.0188,
-      "student": 0.0171
+      "elderly": 0.0077,
+      "rmg_worker": 0.0134,
+      "rural_lowlit": 0.0157,
+      "salaried": 0.0268,
+      "small_merchant": 0.0231,
+      "student": 0.0158
     },
     "gender": {
-      "F": 0.0184,
-      "M": 0.0211
+      "F": 0.0193,
+      "M": 0.0206
     },
     "region": {
-      "chattogram": 0.0219,
-      "dhaka": 0.0186,
-      "rural_north": 0.0216,
-      "rural_south": 0.0193
+      "chattogram": 0.0164,
+      "dhaka": 0.0215,
+      "rural_north": 0.0246,
+      "rural_south": 0.0168
     },
     "feature_phone": {
-      "False": 0.0202,
-      "True": 0.0163
+      "False": 0.0203,
+      "True": 0.0125
     },
     "age_band": {
-      "18-25": 0.022,
-      "26-40": 0.0198,
-      "41-55": 0.0163,
-      "56+": 0.0132
+      "18-25": 0.0184,
+      "26-40": 0.0223,
+      "41-55": 0.0145,
+      "56+": 0.01
     }
   },
   "novel_attack_holdout": {
     "held_out": "A5_gambling_laundering",
-    "recall_supervised_never_saw_A5": 0.5424,
-    "recall_unsupervised_L1_L5": 0.6949,
+    "recall_supervised_never_saw_A5": 0.3333,
+    "recall_unsupervised_L1_L5": 0.4792,
     "recall_supervised_with_A5": 1.0
   },
   "shap_global_top10": {
-    "mk_min_logp": 0.6872,
-    "has_balance_check": 0.6096,
-    "frac_new_recipient": 0.6082,
-    "money_total": 0.4077,
-    "money_max": 0.3011,
-    "mk_mean_nll": 0.2621,
-    "ms_per_char_min": 0.2214,
-    "screen_ratio": 0.1926,
-    "money_per_minute": 0.1857,
-    "telemetry_ratio": 0.176
+    "mk_min_logp": 0.6453,
+    "frac_new_recipient": 0.5913,
+    "has_balance_check": 0.4823,
+    "money_total": 0.4682,
+    "money_max": 0.2703,
+    "mk_mean_nll": 0.2599,
+    "money_per_minute": 0.2362,
+    "hour": 0.2337,
+    "screen_ratio": 0.1558,
+    "ms_per_char_min": 0.1397
   },
   "shap_top5_by_archetype": {
     "A1_scripted_api": {
-      "mk_min_logp": 10.814,
-      "frac_new_recipient": 3.3745,
-      "money_total": 1.5215,
-      "money_max": 1.3713,
-      "mk_mean_nll": 1.3504
+      "mk_min_logp": 10.8506,
+      "frac_new_recipient": 3.2669,
+      "money_total": 1.8621,
+      "mk_n_unseen": 1.4858,
+      "money_per_minute": 1.4346
     },
     "A2_otp_relay_takeover": {
-      "mk_min_logp": 7.3223,
-      "frac_new_recipient": 3.3145,
-      "money_total": 3.1087,
-      "money_max": 2.1438,
-      "has_otp": 1.1199
+      "mk_min_logp": 7.2766,
+      "money_total": 3.5269,
+      "frac_new_recipient": 3.2135,
+      "money_max": 1.9204,
+      "has_otp": 1.3566
     },
     "A3_coerced_victim": {
-      "mk_min_logp": 4.3341,
-      "frac_new_recipient": 3.0418,
-      "money_total": 2.8404,
-      "money_max": 2.7374,
-      "has_balance_check": 0.9669
+      "mk_min_logp": 3.7566,
+      "money_total": 3.34,
+      "frac_new_recipient": 2.8295,
+      "money_max": 2.2658,
+      "has_balance_check": 0.8872
     },
     "A5_gambling_laundering": {
-      "n_money": 5.2346,
-      "frac_new_recipient": 3.1766,
-      "money_per_minute": 2.0778,
-      "money_max": 1.8303,
-      "has_balance_check": 1.5246
+      "n_money": 5.4046,
+      "frac_new_recipient": 3.1006,
+      "money_per_minute": 2.0915,
+      "money_total": 1.8039,
+      "money_max": 1.6158
     },
     "A6_emulator_farm": {
-      "mk_min_logp": 13.7352,
-      "frac_new_recipient": 2.904,
-      "mk_mean_nll": 2.0435,
-      "money_per_minute": 1.4804,
-      "mk_n_unseen": 1.251
+      "mk_min_logp": 13.52,
+      "frac_new_recipient": 2.8067,
+      "mk_mean_nll": 2.3604,
+      "money_per_minute": 1.9522,
+      "mk_n_unseen": 1.526
     },
     "A7_adaptive_scripted": {
-      "mk_min_logp": 10.9097,
-      "frac_new_recipient": 3.3273,
-      "money_total": 1.5221,
-      "mk_n_unseen": 1.3552,
-      "money_max": 1.3204
+      "mk_min_logp": 11.2076,
+      "frac_new_recipient": 3.2165,
+      "money_total": 1.7795,
+      "mk_n_unseen": 1.5979,
+      "money_per_minute": 1.3194
     }
   },
   "detection_latency": {
-    "fraud_sessions": 449,
-    "detected": 449,
-    "stopped_at_or_before_first_money_request": 0.9176,
-    "detected_before_first_money_attempt": 0.7283,
+    "fraud_sessions": 399,
+    "detected": 399,
+    "stopped_at_or_before_first_money_request": 0.9248,
+    "detected_before_first_money_attempt": 0.8496,
     "median_events_to_detect": 8.0,
     "median_first_money_idx": 12.0,
     "by_archetype": {
@@ -206,17 +206,17 @@
       },
       "A2_otp_relay_takeover": {
         "stopped_before_money": 1.0,
-        "median_detect_event": 13.0,
-        "median_money_event": 21.0
+        "median_detect_event": 11.0,
+        "median_money_event": 22.0
       },
       "A3_coerced_victim": {
-        "stopped_before_money": 0.9726,
-        "median_detect_event": 18.0,
+        "stopped_before_money": 0.9663,
+        "median_detect_event": 14.0,
         "median_money_event": 18.0
       },
       "A5_gambling_laundering": {
-        "stopped_before_money": 0.4068,
-        "median_detect_event": 13.0,
+        "stopped_before_money": 0.4375,
+        "median_detect_event": 14.0,
         "median_money_event": 11.0
       },
       "A6_emulator_farm": {
@@ -227,17 +227,17 @@
       "A7_adaptive_scripted": {
         "stopped_before_money": 1.0,
         "median_detect_event": 1.0,
-        "median_money_event": 5.0
+        "median_money_event": 4.0
       }
     },
-    "money_at_risk_bdt": 9242070.0,
-    "money_protected_bdt": 8734470.0
+    "money_at_risk_bdt": 8010735.0,
+    "money_protected_bdt": 7656535.0
   },
   "account_role_misuse": {
     "n_test": 600,
-    "positives_test": 6,
+    "positives_test": 15,
     "auc": 1.0,
     "pr_auc": 1.0
   },
-  "train_seconds": 41.5
+  "train_seconds": 40.9
 }

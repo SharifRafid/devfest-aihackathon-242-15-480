@@ -26,54 +26,14 @@ I don't have the jev key at hand, what is your suggestion at the moment for me?
 
 go
 
-## [2026-10-07 09:44:15] Prompt #7
-
-<task-notification>
-<task-id>bzgc2fl8y</task-id>
-<tool-use-id>toolu_01Gfzzfk5TnA7tGfDCCnWC3h</tool-use-id>
-<output-file>/private/tmp/claude-501/-Users-sharifrafid-Projects-devfest-aihackathon-242-15-480/a7072128-d2b0-44e7-9605-eac2eb2a03f8/tasks/bzgc2fl8y.output</output-file>
-<status>failed</status>
-<summary>Background command "Create Python venv and install ML and API dependencies" failed with exit code 144</summary>
-</task-notification>
-
-## [2026-10-07 09:46:46] Prompt #8
+## [2026-10-07 09:46:46] Prompt #7
 
 While the other session is running building the actual product '/Users/sharifrafid/Projects/devfest-aihackathon-242-15-480/STRATEGY.md', I want you to explain to me the entire structure of the project in details so that I can fully understand the entire thing end to end.
 
-## [2026-10-07 09:48:50] Prompt #9
-
-<task-notification>
-<task-id>bnufhzb8o</task-id>
-<tool-use-id>toolu_0117a7iy4Ji7NJKVhAPGX55W</tool-use-id>
-<output-file>/private/tmp/claude-501/-Users-sharifrafid-Projects-devfest-aihackathon-242-15-480/a7072128-d2b0-44e7-9605-eac2eb2a03f8/tasks/bnufhzb8o.output</output-file>
-<status>completed</status>
-<summary>Background command "Install libomp via Homebrew and verify LightGBM loads" completed (exit code 0)</summary>
-</task-notification>
-
-## [2026-10-07 09:49:44] Prompt #10
+## [2026-10-07 09:49:44] Prompt #8
 
 How will I train the model and push the site live? It wont be possible on my device.
 
-## [2026-10-07 09:49:52] Prompt #11
-
-<task-notification>
-<task-id>bh3ie6t40</task-id>
-<tool-use-id>toolu_01KfKzLQiZPaMh5XHzKaxcWa</tool-use-id>
-<output-file>/private/tmp/claude-501/-Users-sharifrafid-Projects-devfest-aihackathon-242-15-480/a7072128-d2b0-44e7-9605-eac2eb2a03f8/tasks/bh3ie6t40.output</output-file>
-<status>completed</status>
-<summary>Background command "Wait until all Python dependencies are importable" completed (exit code 0)</summary>
-</task-notification>
-
-## [2026-10-07 09:54:39] Prompt #12
-
-<task-notification>
-<task-id>byrvf32vp</task-id>
-<tool-use-id>toolu_012KDGDCqsaVgJKBsnCoPLDP</tool-use-id>
-<output-file>/private/tmp/claude-501/-Users-sharifrafid-Projects-devfest-aihackathon-242-15-480/a7072128-d2b0-44e7-9605-eac2eb2a03f8/tasks/byrvf32vp.output</output-file>
-<status>completed</status>
-<summary>Background command "Scaffold Vite React app with Tailwind, Recharts and icons" completed (exit code 0)</summary>
-</task-notification>
-
-## [2026-10-07 09:55:09] Prompt #13
+## [2026-10-07 09:55:09] Prompt #9
 
 The demo and everything is getting ready, but how can I make this presentable to the end judges so that they at least know at first glance that my idea is unique? FYI, there was a phase 1 of this hackathon that I missed and I'm attending the phase 2 without any submissions in the phase 1, so I will get a minus point for that, how much will it affect me?
