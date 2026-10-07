@@ -5,6 +5,8 @@
 
 > Every fraud model scores the transaction. **Second Thought scores the path to it.**
 
+**Live demo:** https://second-thought-pink.vercel.app · **Repo:** https://github.com/SharifRafid/devfest-aihackathon-242-15-480 · **Deck:** `deck/SecondThought-deck.pdf`
+
 ---
 
 ## 1. Problem statement (official template)

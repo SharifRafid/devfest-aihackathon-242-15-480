@@ -68,9 +68,9 @@ export default function Phone({ session }) {
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-start">
       <div className="mx-auto w-[340px] rounded-[2.2rem] border-[10px] border-black bg-white text-black shadow-2xl overflow-hidden">
-        <div className="bg-[#e4007c] text-white px-4 py-3 flex items-center justify-between">
+        <div className="bg-[#FFC20E] text-black px-4 py-3 flex items-center justify-between">
           <div className="font-bold tracking-wide">upay</div>
-          <button onClick={() => setLang(bn ? 'en' : 'bn')} className="text-xs bg-white/20 rounded px-2 py-0.5">{bn ? 'EN' : 'বাং'}</button>
+          <button onClick={() => setLang(bn ? 'en' : 'bn')} className="text-xs bg-black/10 rounded px-2 py-0.5">{bn ? 'EN' : 'বাং'}</button>
         </div>
         <div className="min-h-[520px]"><Body /></div>
       </div>
