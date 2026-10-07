@@ -13,5 +13,3 @@ venv/
 *.log
 .ipynb_checkpoints/
 .claude/settings.local.json
-ml/models/features.parquet
-ml/models/latency.parquet
